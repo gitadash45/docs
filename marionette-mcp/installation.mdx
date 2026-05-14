@@ -1,0 +1,160 @@
+---
+title: "Installation"
+description: "Set up the Marionette MCP server and prepare your Flutter app"
+icon: "download"
+sidebarTitle: "Installation"
+---
+
+## Step 1 — Install the MCP server
+
+Run this once on your machine:
+
+```bash
+dart pub global activate marionette_mcp
+```
+
+<Note>
+  If the `marionette_mcp` command isn't found after this, add the Dart pub cache to your PATH:
+
+  ```bash
+  export PATH="$PATH":"$HOME/.pub-cache/bin"
+  ```
+</Note>
+
+---
+
+## Step 2 — Add the package to your Flutter app
+
+Inside your Flutter project:
+
+```bash
+flutter pub add marionette_flutter
+```
+
+This updates your `pubspec.yaml` automatically.
+
+---
+
+## Step 3 — Initialize in `main.dart`
+
+Wrap your existing binding initialization:
+
+```dart main.dart
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:marionette_flutter/marionette_flutter.dart';
+
+void main() {
+  if (kDebugMode) {
+    MarionetteBinding.ensureInitialized(); // add this
+  } else {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
+
+  runApp(const MyApp());
+}
+```
+
+Only runs in debug mode — your release build is not affected.
+
+---
+
+## Step 4 — Add Marionette to your AI tool's MCP config
+
+<Tabs>
+  <Tab title="Cursor">
+    Add to `.cursor/mcp.json` in your project (or `~/.cursor/mcp.json` globally):
+
+    ```json
+    {
+      "mcpServers": {
+        "marionette": {
+          "command": "marionette_mcp",
+          "args": []
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport stdio marionette -- marionette_mcp
+    ```
+  </Tab>
+  <Tab title="Copilot / Gemini">
+    ```json
+    {
+      "mcpServers": {
+        "marionette": {
+          "command": "marionette_mcp",
+          "args": []
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Step 5 — Create a verification subagent
+
+The most powerful way to use Marionette is to give your AI a dedicated **subagent** that knows how to verify Flutter UI automatically — connecting to the app, driving it, catching bugs, fixing them, and re-verifying.
+
+Create a file in your project at `.cursor/agents/flutter-marionette-verifier.md` (or wherever your IDE stores agent prompts):
+
+```markdown
+---
+name: flutter-marionette-verifier
+description: Flutter UI and behavior verifier using Marionette MCP. Use proactively after any feature or UI change when the app runs in debug mode—connects to the VM service, drives the UI, compares outcomes to intended behavior, fixes implementation bugs, hot-reloads, and repeats until behavior matches the spec.
+---
+
+You are a Flutter verification and repair specialist. Your job is to close the gap between what was implemented and what was intended, using the Marionette MCP tools against a debug Flutter session.
+
+## Preconditions
+
+- The target Flutter app is running in debug mode so a VM service URI is available (typically `ws://127.0.0.1:<port>/ws` in the run output).
+- If the URI was not supplied, ask once for it — do not invent one.
+- Before any Marionette action except `connect`, ensure `connect` has succeeded.
+
+## Workflow
+
+1. `connect` — pass the VM service URI.
+2. `get_interactive_elements` — discover what is on screen; prefer matching by `key` over text.
+3. Drive the flow — `tap`, `enter_text`, `scroll_to` as needed.
+4. Observe — `take_screenshots` after meaningful steps; `get_logs` when behavior is wrong.
+5. After code changes — `hot_reload` then re-run the same verification path.
+
+## Verify → fix loop
+
+Repeat until the feature matches intent:
+
+1. **Intent** — restate the acceptance criteria clearly.
+2. **Execute** — walk the UI path with Marionette.
+3. **Compare** — expected vs actual.
+4. **Diagnose** — find the root cause in app code.
+5. **Fix** — smallest change that solves it.
+6. **`hot_reload`** — re-verify the full path.
+
+## Output
+
+For each iteration: what you tested, result (pass/fail), and if failed — symptom, cause, what changed, what you'll check next.
+
+On success: short summary of criteria checked off.
+```
+
+Once added, you can invoke it in your AI chat like:
+
+> _"Use @flutter-marionette-verifier to verify the profile page. VM service URI: `ws://127.0.0.1:63086/ws`"_
+
+---
+
+## Connecting to your app
+
+1. Run: `flutter run`
+2. Copy the VM service URI from the console output — looks like `ws://127.0.0.1:9101/ws`
+3. Give the URI to your AI or subagent
+
+<Card title="See real examples →" icon="star" href="/marionette-mcp/examples">
+  How this was used to build and verify a full profile screen and catch a pagination bug.
+</Card>

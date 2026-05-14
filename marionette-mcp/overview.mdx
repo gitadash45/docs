@@ -1,0 +1,43 @@
+---
+title: "Overview"
+description: "Marionette MCP — AI agent control for Flutter apps at runtime"
+icon: "robot"
+sidebarTitle: "Overview"
+---
+
+## What is it?
+
+**Marionette MCP** lets your AI (Cursor, Claude, etc.) **directly control your running Flutter app** — tap buttons, type into fields, scroll, and take screenshots — without you manually testing anything.
+
+Instead of you verifying every feature you build, your AI does it and reports back what works and what doesn't.
+
+<Note>
+  Only works while your app is running in **debug mode**. Your release build is completely unaffected.
+</Note>
+
+## How does it work?
+
+Flutter's debug mode exposes a **VM Service** — a live connection to your running app. Marionette bridges your AI to that:
+
+```text
+Your prompt → AI Agent → Marionette MCP → Running Flutter App
+```
+
+Add one line to `main.dart`, and your AI can start driving your app immediately.
+
+## What the AI can do
+
+|  |  |
+| --- | --- |
+| **Connect** | Attach to your app via a VM service URI |
+| **See elements** | List all tappable buttons, inputs, and widgets on screen |
+| **Tap** | Tap any element by text or widget key |
+| **Type** | Enter text into any field |
+| **Scroll** | Scroll until a target element is visible |
+| **Screenshot** | Capture the current screen |
+| **Read logs** | Pull app logs for debugging |
+| **Hot reload** | Apply code changes without restarting |
+
+<Card title="Set it up →" icon="rocket" href="/marionette-mcp/installation">
+  Get running in a few minutes.
+</Card>

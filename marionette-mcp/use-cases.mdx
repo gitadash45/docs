@@ -1,0 +1,58 @@
+---
+title: "Use Cases"
+description: "What you can use Marionette MCP for"
+icon: "play"
+sidebarTitle: "Use Cases"
+---
+
+Marionette MCP is most useful in three situations: verifying what you just built, catching regressions, and letting the AI find bugs you didn't notice.
+
+---
+
+## Verify a feature after building it
+
+After your AI implements a feature, instead of manually opening the app and testing it yourself — tell Marionette to verify it.
+
+The AI will navigate to the screen, interact with it, check the logs, and report if something doesn't behave as expected.
+
+**Example:**
+
+> _"I just built a profile page. Connect to the app at `ws://127.0.0.1:63086/ws`, tap the Profile icon in the bottom nav, verify the page loads, fill in the name and bio fields, hit Save, and confirm the updated data still shows after navigating away and coming back."_
+
+---
+
+## Catch bugs automatically
+
+Marionette doesn't just confirm things work — it actively finds issues. When it spots unexpected behavior, it reports the bug, fixes it in code, hot reloads, and re-verifies. All in the same session.
+
+**Real example:** A profile save feature was built. Marionette connected, navigated to the profile, typed into a chip input field, saved — and caught that text typed but not confirmed with Enter was lost on save. It reported the issue, the fix was applied, and Marionette re-verified it worked.
+
+---
+
+## Verify test cases
+
+Have a list of test cases? Instead of running them manually, describe them to the AI and let Marionette execute them against your live app.
+
+**Example:**
+
+> _"Connect to the app at `ws://127.0.0.1:63086/ws`. Go to the Jobs screen, scroll through to page 5, then search for 'designer'. The results should reset to page 1 showing relevant listings — not show 'no records found' because the pagination is still sitting on page 5."_
+
+Marionette will run the scenario, observe the outcome, and confirm pass or fail.
+
+---
+
+## Smoke test after refactoring
+
+Made structural changes? Ask for a quick pass across the critical flows to confirm nothing broke.
+
+**Example:**
+
+> _"I refactored the navigation. Connect to the app, tap through each tab in the bottom nav, and check logs for any errors."_
+
+---
+
+## Tips
+
+- **Add widget keys** to your Flutter widgets — e.g. `Key('save_button')`. Marionette targets them much more reliably than by text alone.
+- **Give context** — tell the AI what screen to start from, what the expected outcome is, and what counts as success.
+- **Pair with a subagent** — set up a dedicated verification subagent in your IDE so Marionette runs automatically after every implementation. See [Setup](/marionette-mcp/installation).

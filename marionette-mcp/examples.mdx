@@ -1,0 +1,60 @@
+---
+title: "Examples"
+description: "Real examples of Marionette MCP in action"
+icon: "star"
+sidebarTitle: "Examples"
+---
+
+These are real use cases where Marionette MCP was used in an actual development session.
+
+---
+
+## Example 1 — Building and verifying a profile screen
+
+**The task:** Build a profile page (with an edit profile screen) from Figma designs. Store data in local storage. Open it from the bottom nav's Profile icon.
+
+**The prompt sent to the AI:**
+
+> _"I want you to create a profile page — this will open from the bottom navigation profile icon tap. Implement these 2 designs from Figma. The first screen is the full profile page, the second is the edit profile page. Fields in the edit page are chip inputs — user types and presses Enter to add a chip. Profile data should be stored in local storage so changes persist._
+>
+> _After implementing, connect to the app via `ws://127.0.0.1:61946/ws`, perform a hot restart so changes are visible._
+>
+> _Then use @flutter-marionette-verifier to verify this functionality. VM service URI: `ws://127.0.0.1:63086/ws`"_
+
+**What happened:**
+
+1. The AI implemented the profile and edit profile screens from the Figma designs.
+2. It initialized the connection and hot restarted so the new screens were live.
+3. The verifier subagent connected to the app, tapped the Profile icon, navigated to the edit screen, and tested the chip input fields.
+4. **Bug found:** Text typed into a chip field but not confirmed with Enter was silently lost when the profile was saved. The `onSubmit` handler was only triggered by Enter — there was no fallback to save draft text on save.
+5. The agent reported the issue, applied a fix, hot reloaded, and re-verified.
+6. ✅ All criteria passed in the next run.
+
+**Result:** A complete, working profile screen with a real bug caught and fixed — all in a single prompt session, without any manual testing.
+
+---
+
+## Example 2 — Catching a pagination bug in test cases
+
+**The task:** Verify test cases for a project's search and pagination flow.
+
+**The test case:**
+
+> _"Verify Seach functionality on product management tab."_
+
+**What happened:**
+
+1. Marionette connected to the app, navigated to the list screen, and paginated to page 5.
+2. It then triggered a new search.
+3. **Bug found:** Results updated but the pagination stayed on page 5 — showing "no records found" because the new query had fewer results than 5 pages.
+4. The agent reported the bug clearly: pagination state was not reset when a new search was triggered.
+5. The fix was applied and Marionette re-verified the scenario.
+6. ✅ Pagination correctly reset to page 1 after the fix.
+
+**Result:** A bug that would have been tedious to reproduce manually was caught automatically, with a clear reproduction path and fix.
+
+---
+
+<Tip>
+  Both examples used the `@flutter-marionette-verifier` subagent described in [Setup](/marionette-mcp/installation#step-5--create-a-verification-subagent). The subagent's verify → fix → reload loop is what made these fully automated.
+</Tip>
